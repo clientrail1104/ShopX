@@ -15,7 +15,7 @@
             theme: {
                 extend: {
                     colors: {
-                        shopee: {
+                        : {
                             DEFAULT: '#f53d2d',
                             hover: '#e23323',
                             orange: '#ff5722',
@@ -52,7 +52,7 @@
         <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-6">
             <!-- LOGO -->
             <a href="#" onclick="switchTab('shop')" class="flex items-center gap-2 text-2xl font-black tracking-wider text-white">
-                <i class="fas fa-shopping-bag text-3xl"></i> Shopee<span
+                <i class="fas fa-shopping-bag text-3xl"></i> ShopX<span class="text-yellow-300"></span>
             </a>
 
             <!-- SEARCH BAR -->
@@ -180,7 +180,7 @@
             <button onclick="closeBidModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
             <h3 class="text-lg font-bold text-gray-800 mb-1" id="bidItemTitle">Place Your Bid</h3>
             <p class="text-xs text-gray-500 mb-4">Minimum increment: +$5.00</p>
-            
+
             <div class="bg-orange-50 p-3 rounded-md mb-4 border border-orange-200">
                 <div class="text-xs text-gray-600">Current Highest Bid:</div>
                 <div class="text-2xl font-black text-shopee" id="bidModalCurrent"></div>
@@ -249,7 +249,7 @@
                 <i class="fab fa-stripe text-indigo-600 text-4xl"></i>
                 <span class="text-sm font-semibold text-gray-500">Secure Checkout</span>
             </div>
-            
+
             <div id="stripePaymentContent">
                 <div class="bg-slate-50 p-3 rounded mb-4 text-xs">
                     <div class="flex justify-between mb-1">
@@ -406,7 +406,7 @@
             visibleProducts.forEach(product => {
                 const card = document.createElement('div');
                 card.className = "bg-white rounded-lg shadow-sm hover:shadow-md transition duration-200 flex flex-col justify-between overflow-hidden border border-gray-100 group";
-                
+
                 card.innerHTML = `
                     <div class="relative overflow-hidden bg-gray-100 aspect-square">
                         <img src="${product.image}" alt="${product.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
@@ -482,7 +482,7 @@
             isAdminActive = !isAdminActive;
             const portal = document.getElementById('adminPortal');
             const btnText = document.getElementById('adminBtnText');
-            
+
             if (isAdminActive) {
                 portal.classList.remove('hidden');
                 btnText.innerText = "Exit Admin";
@@ -623,7 +623,7 @@
         function addToCart(id) {
             const p = products.find(x => x.id === id);
             if (!p) return;
-            
+
             const existing = cart.find(c => c.id === id);
             if (existing) {
                 existing.qty++;

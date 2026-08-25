@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ShopeeX - Next-Gen E-Commerce & Auctions</title>
+    <title>ShopX - Next-Gen E-Commerce & Auctions</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -123,7 +123,7 @@
                 <div class="bg-slate-900 rounded-lg p-6 text-white flex flex-col justify-between shadow border border-slate-700">
                     <div>
                         <span class="bg-red-600 text-white font-bold text-xs px-2 py-1 rounded uppercase tracking-wider animate-pulse">Live Auction</span>
-                        <h2 class="text-xl font-bold mt-2">ShopeeX Bidding Zone</h2>
+                        <h2 class="text-xl font-bold mt-2">ShopX Bidding Zone</h2>
                         <p class="text-xs text-gray-300 mt-1">Bid on rare prototype electronics and limited drops in real-time.</p>
                     </div>
                     <button onclick="filterAuction()" class="mt-4 bg-shopee text-white font-bold text-sm px-5 py-2 rounded-md shadow w-fit hover:bg-shopee-hover transition">View Live Auctions</button>
@@ -254,7 +254,7 @@
                 <div class="bg-slate-50 p-3 rounded mb-4 text-xs">
                     <div class="flex justify-between mb-1">
                         <span class="text-gray-500">Merchant:</span>
-                        <span class="font-bold">ShopeeX Store</span>
+                        <span class="font-bold">ShopX Store</span>
                     </div>
                     <div class="flex justify-between font-bold text-sm text-slate-800">
                         <span>Total Due:</span>
@@ -288,11 +288,11 @@
         <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-6">
             <div>
                 <h4 class="text-white font-bold text-sm mb-2">Customer Care</h4>
-                <p>Help Centre, Payment Methods, ShopeeX Guarantee, Live Auction Rules, Return & Refund.</p>
+                <p>Help Centre, Payment Methods, ShopX Guarantee, Live Auction Rules, Return & Refund.</p>
             </div>
             <div>
-                <h4 class="text-white font-bold text-sm mb-2">About ShopeeX</h4>
-                <p>2026 Trending Products, ShopeeX Blog, Flash Sales, Seller Center, Privacy Policy.</p>
+                <h4 class="text-white font-bold text-sm mb-2">About ShopX</h4>
+                <p>2026 Trending Products, ShopX Blog, Flash Sales, Seller Center, Privacy Policy.</p>
             </div>
             <div>
                 <h4 class="text-white font-bold text-sm mb-2">Payment Gateways</h4>
@@ -373,7 +373,7 @@
         ];
 
         // STATE MANAGEMENT
-        let products = JSON.parse(localStorage.getItem('shopeex_products')) || DEFAULT_PRODUCTS;
+        let products = JSON.parse(localStorage.getItem('shopx_products')) || DEFAULT_PRODUCTS;
         let cart = [];
         let currentBidItemId = null;
         let isAdminActive = false;
@@ -387,7 +387,7 @@
         }
 
         function saveProducts() {
-            localStorage.setItem('shopeex_products', JSON.stringify(products));
+            localStorage.setItem('shopx_products', JSON.stringify(products));
         }
 
         // RENDER PRODUCT CATALOG FOR CUSTOMERS

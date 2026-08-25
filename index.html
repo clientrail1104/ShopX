@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopeeX - Next-Gen E-Commerce & Auctions</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Stripe.js SDK -->
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        shopee: {
+                            DEFAULT: '#f53d2d',
+                            hover: '#e23323',
+                            orange: '#ff5722',
+                            bg: '#f5f5f5'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-shopee-bg font-sans text-gray-800 flex flex-col min-h-screen">
+
+    <!-- TOP HEADER -->
+    <header class="bg-gradient-to-b from-shopee to-shopee-orange text-white sticky top-0 z-40 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-2 text-xs flex justify-between border-b border-orange-400/40">
+            <div class="flex items-center space-x-4">
+                <span>Seller Centre</span>
+                <span>|</span>
+                <span>Download App</span>
+                <span>|</span>
+                <span class="flex items-center gap-1">Follow us on <i class="fab font-bold fa-instagram"></i> <i class="fab fa-facebook"></i></span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button onclick="toggleAdminView()" class="hover:underline flex items-center gap-1 text-yellow-200 font-bold">
+                    <i class="fas fa-user-shield"></i> <span id="adminBtnText">Admin Console</span>
+                </button>
+                <span>|</span>
+                <span id="userStatus" class="cursor-pointer hover:underline">Customer Portal</span>
+            </div>
+        </div>
+
+        <!-- MAIN NAV BAR -->
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-6">
+            <!-- LOGO -->
+            <a href="#" onclick="switchTab('shop')" class="flex items-center gap-2 text-2xl font-black tracking-wider text-white">
+                <i class="fas fa-shopping-bag text-3xl"></i> Shopee<span class="text-yellow-300">X</span>
+            </a>
+
+            <!-- SEARCH BAR -->
+            <div class="flex-1 max-w-2xl relative">
+                <div class="flex bg-white rounded-sm overflow-hidden p-1 shadow-sm">
+                    <input type="text" id="searchInput" oninput="renderProducts()" placeholder="Search 2026 trending items, live auctions, AR glasses..." class="w-full px-4 py-2 text-gray-800 text-sm focus:outline-none">
+                    <button class="bg-shopee hover:bg-shopee-hover text-white px-6 py-2 rounded-sm font-semibold transition">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- SHOPPING CART -->
+            <div class="relative cursor-pointer" onclick="toggleCartDrawer()">
+                <i class="fas fa-shopping-cart text-2xl"></i>
+                <span id="cartBadge" class="absolute -top-2 -right-2 bg-yellow-400 text-shopee font-bold rounded-full w-5 h-5 flex items-center justify-center text-xs shadow">0</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full">
+
+        <!-- ADMIN PORTAL VIEW (Hidden by Default) -->
+        <section id="adminPortal" class="hidden bg-white rounded-lg shadow-sm p-6 mb-8 border border-gray-200">
+            <div class="flex justify-between items-center pb-4 mb-6 border-b">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800"><i class="fas fa-tasks text-shopee mr-2"></i> Storefront Administration Dashboard</h2>
+                    <p class="text-xs text-gray-500">Manage catalog visibility, add trending stock, and adjust live bidding parameters.</p>
+                </div>
+                <button onclick="openAddProductModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold px-4 py-2 rounded-md shadow flex items-center gap-2">
+                    <i class="fas fa-plus"></i> Add New Product
+                </button>
+            </div>
+
+            <!-- PRODUCT MANAGEMENT TABLE -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-gray-600 border-collapse">
+                    <thead class="bg-gray-100 text-gray-700 uppercase text-xs">
+                        <tr>
+                            <th class="p-3">Item</th>
+                            <th class="p-3">Category</th>
+                            <th class="p-3">Price / Min Bid</th>
+                            <th class="p-3">Type</th>
+                            <th class="p-3">Visibility</th>
+                            <th class="p-3 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminProductTable" class="divide-y divide-gray-200">
+                        <!-- Admin rows injected via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- SHOPPING STOREFRONT VIEW -->
+        <div id="customerPortal">
+            <!-- HERO PROMO BANNER -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="md:col-span-2 bg-gradient-to-r from-orange-500 to-amber-500 rounded-lg p-6 text-white flex flex-col justify-between shadow">
+                    <div>
+                        <span class="bg-yellow-300 text-gray-900 font-black text-xs px-2 py-1 rounded uppercase tracking-wider">2026 Tech & Beauty Trends</span>
+                        <h1 class="text-3xl font-extrabold mt-2">Next-Gen Tech & Wellness Flash Deals</h1>
+                        <p class="text-sm opacity-90 mt-1">Get up to 60% off AR Smart Glasses, Hydrocolloid Patches, and LED Therapy Masks.</p>
+                    </div>
+                    <button class="mt-4 bg-white text-shopee font-bold text-sm px-5 py-2 rounded-md shadow w-fit hover:bg-gray-100 transition">Shop Main Sale</button>
+                </div>
+                <div class="bg-slate-900 rounded-lg p-6 text-white flex flex-col justify-between shadow border border-slate-700">
+                    <div>
+                        <span class="bg-red-600 text-white font-bold text-xs px-2 py-1 rounded uppercase tracking-wider animate-pulse">Live Auction</span>
+                        <h2 class="text-xl font-bold mt-2">ShopeeX Bidding Zone</h2>
+                        <p class="text-xs text-gray-300 mt-1">Bid on rare prototype electronics and limited drops in real-time.</p>
+                    </div>
+                    <button onclick="filterAuction()" class="mt-4 bg-shopee text-white font-bold text-sm px-5 py-2 rounded-md shadow w-fit hover:bg-shopee-hover transition">View Live Auctions</button>
+                </div>
+            </div>
+
+            <!-- LIVE BIDDING / AUCTION SECTION HEADER -->
+            <div class="bg-white rounded-lg p-4 shadow-sm mb-6 flex items-center justify-between border-l-4 border-shopee">
+                <div class="flex items-center space-x-3">
+                    <span class="flex h-3 w-3 relative">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                    </span>
+                    <h2 class="text-lg font-bold text-gray-800">Featured Auction Arena</h2>
+                </div>
+                <div id="auctionCountdown" class="text-xs font-mono font-bold bg-gray-100 text-red-600 px-3 py-1 rounded border">
+                    Ends in: 04h 32m 10s
+                </div>
+            </div>
+
+            <!-- PRODUCTS GRID -->
+            <div id="productGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- CART SLIDE-OVER DRAWER -->
+    <div id="cartDrawer" class="fixed inset-0 bg-black/50 z-50 hidden flex justify-end">
+        <div class="bg-white w-full max-w-md h-full flex flex-col shadow-2xl">
+            <div class="p-4 bg-shopee text-white flex justify-between items-center">
+                <h3 class="font-bold text-lg"><i class="fas fa-shopping-cart mr-2"></i> Your Cart</h3>
+                <button onclick="toggleCartDrawer()" class="text-white hover:text-gray-200 text-xl font-bold">&times;</button>
+            </div>
+            <div id="cartItems" class="p-4 flex-1 overflow-y-auto divide-y divide-gray-100">
+                <!-- Cart items rendered here -->
+            </div>
+            <div class="p-4 border-t bg-gray-50">
+                <div class="flex justify-between font-bold text-lg mb-4">
+                    <span>Total Amount:</span>
+                    <span id="cartTotal" class="text-shopee">$0.00</span>
+                </div>
+                <button onclick="initiateStripeCheckout()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-md shadow transition flex items-center justify-center gap-2">
+                    <i class="fab fa-stripe text-xl"></i> Checkout with Stripe
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BID MODAL -->
+    <div id="bidModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg max-w-sm w-full p-6 shadow-2xl relative">
+            <button onclick="closeBidModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+            <h3 class="text-lg font-bold text-gray-800 mb-1" id="bidItemTitle">Place Your Bid</h3>
+            <p class="text-xs text-gray-500 mb-4">Minimum increment: +$5.00</p>
+            
+            <div class="bg-orange-50 p-3 rounded-md mb-4 border border-orange-200">
+                <div class="text-xs text-gray-600">Current Highest Bid:</div>
+                <div class="text-2xl font-black text-shopee" id="bidModalCurrent"></div>
+            </div>
+
+            <label class="block text-xs font-bold text-gray-700 mb-1">Your Max Bid ($ USD)</label>
+            <input type="number" id="bidInputAmount" class="w-full border rounded p-2 mb-4 text-sm font-bold focus:ring-2 focus:ring-shopee focus:outline-none">
+
+            <button onclick="submitBid()" class="w-full bg-shopee hover:bg-shopee-hover text-white font-bold py-2.5 rounded shadow transition">
+                Confirm & Submit Bid
+            </button>
+        </div>
+    </div>
+
+    <!-- ADD/EDIT PRODUCT MODAL (ADMIN) -->
+    <div id="productModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg max-w-md w-full p-6 shadow-2xl relative">
+            <button onclick="closeProductModal()" class="absolute top-3 right-3 text-gray-400 text-xl font-bold">&times;</button>
+            <h3 class="text-lg font-bold text-gray-800 mb-4" id="productModalTitle">Add New Product</h3>
+            <form id="productForm" onsubmit="handleProductSubmit(event)" class="space-y-3">
+                <input type="hidden" id="adminProductId">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700">Product Title</label>
+                    <input type="text" id="adminTitle" required class="w-full border rounded p-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700">Category</label>
+                    <input type="text" id="adminCategory" required class="w-full border rounded p-2 text-sm">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700">Price ($)</label>
+                        <input type="number" step="0.01" id="adminPrice" required class="w-full border rounded p-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-700">Sale Type</label>
+                        <select id="adminIsBidding" class="w-full border rounded p-2 text-sm">
+                            <option value="false">Standard Purchase</option>
+                            <option value="true">Live Auction</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700">Image URL</label>
+                    <input type="url" id="adminImage" required class="w-full border rounded p-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700">Visibility Status</label>
+                    <select id="adminIsPublished" class="w-full border rounded p-2 text-sm">
+                        <option value="true">Published (Public)</option>
+                        <option value="false">Private (Draft)</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 text-white font-bold py-2 rounded shadow hover:bg-emerald-700 mt-2">
+                    Save Product
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- STRIPE PAYMENT SIMULATION MODAL -->
+    <div id="stripeModal" class="fixed inset-0 bg-black/70 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl relative text-gray-800">
+            <button onclick="closeStripeModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl font-bold">&times;</button>
+            <div class="flex items-center gap-2 mb-4 border-b pb-3">
+                <i class="fab fa-stripe text-indigo-600 text-4xl"></i>
+                <span class="text-sm font-semibold text-gray-500">Secure Checkout</span>
+            </div>
+            
+            <div id="stripePaymentContent">
+                <div class="bg-slate-50 p-3 rounded mb-4 text-xs">
+                    <div class="flex justify-between mb-1">
+                        <span class="text-gray-500">Merchant:</span>
+                        <span class="font-bold">ShopeeX Store</span>
+                    </div>
+                    <div class="flex justify-between font-bold text-sm text-slate-800">
+                        <span>Total Due:</span>
+                        <span id="stripePayAmount">$0.00</span>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-xs font-bold text-gray-600">Cardholder Name</label>
+                        <input type="text" placeholder="John Doe" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-600">Card Details (Stripe Elements Container)</label>
+                        <div class="border rounded p-3 bg-gray-50 text-sm flex items-center justify-between text-gray-500">
+                            <span>4242 •••• •••• 4242</span>
+                            <span class="text-xs font-mono">12/28  CVC 123</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="processStripePayment()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-md mt-6 shadow transition">
+                    Pay Now with Stripe
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="bg-gray-900 text-gray-400 text-xs py-8 mt-12 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div>
+                <h4 class="text-white font-bold text-sm mb-2">Customer Care</h4>
+                <p>Help Centre, Payment Methods, ShopeeX Guarantee, Live Auction Rules, Return & Refund.</p>
+            </div>
+            <div>
+                <h4 class="text-white font-bold text-sm mb-2">About ShopeeX</h4>
+                <p>2026 Trending Products, ShopeeX Blog, Flash Sales, Seller Center, Privacy Policy.</p>
+            </div>
+            <div>
+                <h4 class="text-white font-bold text-sm mb-2">Payment Gateways</h4>
+                <div class="flex gap-2 text-2xl text-gray-300">
+                    <i class="fab fa-stripe"></i>
+                    <i class="fab fa-cc-visa"></i>
+                    <i class="fab fa-cc-mastercard"></i>
+                    <i class="fab fa-apple-pay"></i>
+                </div>
+            </div>
+            <div>
+                <h4 class="text-white font-bold text-sm mb-2">Admin Portal</h4>
+                <p class="mb-2">Manage products, inspect bidding queues, and review sales logs.</p>
+                <button onclick="toggleAdminView()" class="text-yellow-400 font-bold hover:underline">Launch Admin Console &rarr;</button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT APPLICATION LOGIC -->
+    <script>
+        // PRE-LOADED 2026 TRENDING PRODUCTS CATALOG
+        const DEFAULT_PRODUCTS = [
+            {
+                id: "p1",
+                title: "Augmented Reality (AR) Smart Glasses 2026",
+                category: "Gadgets & Tech",
+                price: 299.99,
+                isBidding: false,
+                currentBid: 0,
+                isPublished: true,
+                image: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?auto=format&fit=crop&w=500&q=80",
+                badge: "Hot 2026"
+            },
+            {
+                id: "p2",
+                title: "LED Light Therapy Facial Mask",
+                category: "Beauty & Skincare",
+                price: 89.00,
+                isBidding: true,
+                currentBid: 95.00,
+                isPublished: true,
+                image: "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&w=500&q=80",
+                badge: "Live Auction"
+            },
+            {
+                id: "p3",
+                title: "Portable Emergency Solar Power Station",
+                category: "Home & Outdoor",
+                price: 450.00,
+                isBidding: false,
+                currentBid: 0,
+                isPublished: true,
+                image: "https://images.unsplash.com/photo-1617788138017-80ad40651399?auto=format&fit=crop&w=500&q=80",
+                badge: "Top Seller"
+            },
+            {
+                id: "p4",
+                title: "Ultra-Lightweight Hydrocolloid Pimple Patch Set",
+                category: "Beauty",
+                price: 14.50,
+                isBidding: false,
+                currentBid: 0,
+                isPublished: true,
+                image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=500&q=80",
+                badge: "Trending"
+            },
+            {
+                id: "p5",
+                title: "Prototype AI Health Tracker Smart Ring",
+                category: "Gadgets & Tech",
+                price: 180.00,
+                isBidding: true,
+                currentBid: 210.00,
+                isPublished: true,
+                image: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=500&q=80",
+                badge: "Auction"
+            }
+        ];
+
+        // STATE MANAGEMENT
+        let products = JSON.parse(localStorage.getItem('shopeex_products')) || DEFAULT_PRODUCTS;
+        let cart = [];
+        let currentBidItemId = null;
+        let isAdminActive = false;
+
+        // INITIALIZE APP
+        function init() {
+            saveProducts();
+            renderProducts();
+            renderAdminTable();
+            updateCartUI();
+        }
+
+        function saveProducts() {
+            localStorage.setItem('shopeex_products', JSON.stringify(products));
+        }
+
+        // RENDER PRODUCT CATALOG FOR CUSTOMERS
+        function renderProducts() {
+            const grid = document.getElementById('productGrid');
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            grid.innerHTML = '';
+
+            const visibleProducts = products.filter(p => p.isPublished && p.title.toLowerCase().includes(search));
+
+            if (visibleProducts.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-12 text-gray-500">No products found.</div>`;
+                return;
+            }
+
+            visibleProducts.forEach(product => {
+                const card = document.createElement('div');
+                card.className = "bg-white rounded-lg shadow-sm hover:shadow-md transition duration-200 flex flex-col justify-between overflow-hidden border border-gray-100 group";
+                
+                card.innerHTML = `
+                    <div class="relative overflow-hidden bg-gray-100 aspect-square">
+                        <img src="${product.image}" alt="${product.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                        <span class="absolute top-2 left-2 bg-shopee text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">${product.badge || (product.isBidding ? 'Auction' : 'Sale')}</span>
+                    </div>
+                    <div class="p-3 flex-1 flex flex-col justify-between">
+                        <div>
+                            <span class="text-[10px] text-gray-400 uppercase font-semibold">${product.category}</span>
+                            <h3 class="text-xs font-bold text-gray-800 line-clamp-2 mt-0.5">${product.title}</h3>
+                        </div>
+                        <div class="mt-3">
+                            ${product.isBidding ? `
+                                <div class="text-[11px] text-gray-500">Current Highest Bid:</div>
+                                <div class="text-sm font-black text-shopee">$${product.currentBid.toFixed(2)}</div>
+                                <button onclick="openBidModal('${product.id}')" class="mt-2 w-full bg-slate-900 hover:bg-black text-white text-xs font-bold py-1.5 rounded transition flex items-center justify-center gap-1">
+                                    <i class="fas fa-gavel text-amber-400"></i> Place Bid
+                                </button>
+                            ` : `
+                                <div class="text-[11px] text-gray-400 line-through">$${(product.price * 1.25).toFixed(2)}</div>
+                                <div class="text-sm font-black text-shopee">$${product.price.toFixed(2)}</div>
+                                <button onclick="addToCart('${product.id}')" class="mt-2 w-full bg-shopee hover:bg-shopee-hover text-white text-xs font-bold py-1.5 rounded transition flex items-center justify-center gap-1">
+                                    <i class="fas fa-cart-plus"></i> Add To Cart
+                                </button>
+                            `}
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // ADMIN TABLE MANAGEMENT
+        function renderAdminTable() {
+            const tbody = document.getElementById('adminProductTable');
+            tbody.innerHTML = '';
+
+            products.forEach(product => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50";
+                tr.innerHTML = `
+                    <td class="p-3 flex items-center gap-3">
+                        <img src="${product.image}" class="w-10 h-10 rounded object-cover border">
+                        <span class="font-bold text-gray-800">${product.title}</span>
+                    </td>
+                    <td class="p-3">${product.category}</td>
+                    <td class="p-3 font-semibold text-gray-700">
+                        ${product.isBidding ? `$${product.currentBid.toFixed(2)} (Bid)` : `$${product.price.toFixed(2)}`}
+                    </td>
+                    <td class="p-3">
+                        <span class="px-2 py-0.5 text-xs font-bold rounded ${product.isBidding ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'}">
+                            ${product.isBidding ? 'Auction' : 'Standard'}
+                        </span>
+                    </td>
+                    <td class="p-3">
+                        <span class="px-2 py-0.5 text-xs font-bold rounded ${product.isPublished ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-gray-600'}">
+                            ${product.isPublished ? 'Published' : 'Private'}
+                        </span>
+                    </td>
+                    <td class="p-3 text-right space-x-2">
+                        <button onclick="togglePublishStatus('${product.id}')" class="text-xs px-2 py-1 border rounded hover:bg-gray-100">
+                            ${product.isPublished ? 'Make Private' : 'Publish'}
+                        </button>
+                        <button onclick="editProduct('${product.id}')" class="text-xs text-blue-600 hover:underline">Edit</button>
+                        <button onclick="deleteProduct('${product.id}')" class="text-xs text-red-600 hover:underline">Delete</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // TOGGLE ADMIN PORTAL
+        function toggleAdminView() {
+            isAdminActive = !isAdminActive;
+            const portal = document.getElementById('adminPortal');
+            const btnText = document.getElementById('adminBtnText');
+            
+            if (isAdminActive) {
+                portal.classList.remove('hidden');
+                btnText.innerText = "Exit Admin";
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                portal.classList.add('hidden');
+                btnText.innerText = "Admin Console";
+            }
+        }
+
+        // TOGGLE PUBLISH/PRIVATE
+        function togglePublishStatus(id) {
+            const p = products.find(x => x.id === id);
+            if (p) {
+                p.isPublished = !p.isPublished;
+                saveProducts();
+                renderProducts();
+                renderAdminTable();
+            }
+        }
+
+        // DELETE PRODUCT
+        function deleteProduct(id) {
+            if (confirm("Are you sure you want to remove this item?")) {
+                products = products.filter(p => p.id !== id);
+                saveProducts();
+                renderProducts();
+                renderAdminTable();
+            }
+        }
+
+        // ADD / EDIT PRODUCT FORM MODAL HANDLERS
+        function openAddProductModal() {
+            document.getElementById('productForm').reset();
+            document.getElementById('adminProductId').value = '';
+            document.getElementById('productModalTitle').innerText = "Add New Product";
+            document.getElementById('productModal').classList.remove('hidden');
+        }
+
+        function editProduct(id) {
+            const p = products.find(x => x.id === id);
+            if (!p) return;
+            document.getElementById('adminProductId').value = p.id;
+            document.getElementById('adminTitle').value = p.title;
+            document.getElementById('adminCategory').value = p.category;
+            document.getElementById('adminPrice').value = p.price;
+            document.getElementById('adminIsBidding').value = p.isBidding.toString();
+            document.getElementById('adminImage').value = p.image;
+            document.getElementById('adminIsPublished').value = p.isPublished.toString();
+
+            document.getElementById('productModalTitle').innerText = "Edit Product";
+            document.getElementById('productModal').classList.remove('hidden');
+        }
+
+        function closeProductModal() {
+            document.getElementById('productModal').classList.add('hidden');
+        }
+
+        function handleProductSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('adminProductId').value;
+            const title = document.getElementById('adminTitle').value;
+            const category = document.getElementById('adminCategory').value;
+            const price = parseFloat(document.getElementById('adminPrice').value);
+            const isBidding = document.getElementById('adminIsBidding').value === 'true';
+            const image = document.getElementById('adminImage').value;
+            const isPublished = document.getElementById('adminIsPublished').value === 'true';
+
+            if (id) {
+                // Edit existing
+                const p = products.find(x => x.id === id);
+                p.title = title;
+                p.category = category;
+                p.price = price;
+                p.isBidding = isBidding;
+                p.image = image;
+                p.isPublished = isPublished;
+                if(isBidding && p.currentBid === 0) p.currentBid = price;
+            } else {
+                // Add new
+                products.unshift({
+                    id: "p_" + Date.now(),
+                    title,
+                    category,
+                    price,
+                    isBidding,
+                    currentBid: isBidding ? price : 0,
+                    isPublished,
+                    image,
+                    badge: isBidding ? 'Auction' : 'New'
+                });
+            }
+
+            saveProducts();
+            renderProducts();
+            renderAdminTable();
+            closeProductModal();
+        }
+
+        // BIDDING ENGINE MODAL & LOGIC
+        function openBidModal(id) {
+            const p = products.find(x => x.id === id);
+            if (!p) return;
+            currentBidItemId = id;
+            document.getElementById('bidItemTitle').innerText = p.title;
+            document.getElementById('bidModalCurrent').innerText = `$${p.currentBid.toFixed(2)}`;
+            document.getElementById('bidInputAmount').value = (p.currentBid + 5).toFixed(2);
+            document.getElementById('bidModal').classList.remove('hidden');
+        }
+
+        function closeBidModal() {
+            document.getElementById('bidModal').classList.add('hidden');
+        }
+
+        function submitBid() {
+            const amount = parseFloat(document.getElementById('bidInputAmount').value);
+            const p = products.find(x => x.id === currentBidItemId);
+
+            if (p && amount > p.currentBid) {
+                p.currentBid = amount;
+                saveProducts();
+                renderProducts();
+                renderAdminTable();
+                closeBidModal();
+                alert(`🎉 Bid of $${amount.toFixed(2)} recorded successfully! You are highest bidder.`);
+            } else {
+                alert("Please submit a bid amount strictly higher than current bid.");
+            }
+        }
+
+        function filterAuction() {
+            document.getElementById('searchInput').value = "";
+            const grid = document.getElementById('productGrid');
+            grid.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // SHOPPING CART & STRIPE CHECKOUT INTEGRATION
+        function addToCart(id) {
+            const p = products.find(x => x.id === id);
+            if (!p) return;
+            
+            const existing = cart.find(c => c.id === id);
+            if (existing) {
+                existing.qty++;
+            } else {
+                cart.push({ ...p, qty: 1 });
+            }
+            updateCartUI();
+            toggleCartDrawer(true);
+        }
+
+        function updateCartUI() {
+            const cartItemsContainer = document.getElementById('cartItems');
+            const cartBadge = document.getElementById('cartBadge');
+            const cartTotal = document.getElementById('cartTotal');
+
+            let totalQty = 0;
+            let totalPrice = 0;
+
+            cartItemsContainer.innerHTML = '';
+
+            cart.forEach(item => {
+                totalQty += item.qty;
+                totalPrice += item.price * item.qty;
+
+                const div = document.createElement('div');
+                div.className = "py-3 flex justify-between items-center";
+                div.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <img src="${item.image}" class="w-12 h-12 object-cover rounded">
+                        <div>
+                            <h4 class="text-xs font-bold text-gray-800 line-clamp-1">${item.title}</h4>
+                            <span class="text-xs text-shopee font-bold">$${item.price.toFixed(2)} × ${item.qty}</span>
+                        </div>
+                    </div>
+                    <button onclick="removeFromCart('${item.id}')" class="text-gray-400 hover:text-red-500 text-xs">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                cartItemsContainer.appendChild(div);
+            });
+
+            cartBadge.innerText = totalQty;
+            cartTotal.innerText = `$${totalPrice.toFixed(2)}`;
+        }
+
+        function removeFromCart(id) {
+            cart = cart.filter(c => c.id !== id);
+            updateCartUI();
+        }
+
+        function toggleCartDrawer(open) {
+            const drawer = document.getElementById('cartDrawer');
+            if (open === true) {
+                drawer.classList.remove('hidden');
+            } else {
+                drawer.classList.toggle('hidden');
+            }
+        }
+
+        function initiateStripeCheckout() {
+            if (cart.length === 0) {
+                alert("Your shopping cart is empty!");
+                return;
+            }
+            const totalPrice = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+            document.getElementById('stripePayAmount').innerText = `$${totalPrice.toFixed(2)}`;
+            toggleCartDrawer(false);
+            document.getElementById('stripeModal').classList.remove('hidden');
+        }
+
+        function closeStripeModal() {
+            document.getElementById('stripeModal').classList.add('hidden');
+        }
+
+        function processStripePayment() {
+            const stripeBtn = event.target;
+            stripeBtn.innerText = "Processing Stripe Payment...";
+            stripeBtn.disabled = true;
+
+            setTimeout(() => {
+                alert("✅ Payment Successful! Stripe charge confirmed. Order #SHP-" + Math.floor(Math.random() * 900000 + 100000));
+                cart = [];
+                updateCartUI();
+                closeStripeModal();
+                stripeBtn.innerText = "Pay Now with Stripe";
+                stripeBtn.disabled = false;
+            }, 1800);
+        }
+
+        // RUN AT START
+        init();
+    </script>
+</body>
+</html>

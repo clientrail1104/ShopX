@@ -15,7 +15,7 @@
             theme: {
                 extend: {
                     colors: {
-                        : {
+                        shopee: {
                             DEFAULT: '#f53d2d',
                             hover: '#e23323',
                             orange: '#ff5722',
@@ -373,7 +373,7 @@
         ];
 
         // STATE MANAGEMENT
-        let products = JSON.parse(localStorage.getItem('shopx_products')) || DEFAULT_PRODUCTS;
+        let products = JSON.parse(localStorage.getItem('shopeex_products')) || DEFAULT_PRODUCTS;
         let cart = [];
         let currentBidItemId = null;
         let isAdminActive = false;
@@ -387,7 +387,7 @@
         }
 
         function saveProducts() {
-            localStorage.setItem('shopx_products', JSON.stringify(products));
+            localStorage.setItem('shopeex_products', JSON.stringify(products));
         }
 
         // RENDER PRODUCT CATALOG FOR CUSTOMERS
